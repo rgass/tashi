@@ -35,6 +35,7 @@ from tashi.rpycservices import rpycservices
 from tashi.rpycservices.rpyctypes import TashiException, Errors, InstanceState, HostState
 from tashi.utils.timeout import *
 
+
 def broken(oldFunc):
 	"""Decorator that is used to mark a function as temporarily broken"""
 	def newFunc(*args, **kw):
@@ -47,6 +48,7 @@ def broken(oldFunc):
 	newFunc.__module__ = oldFunc.__module__
 	return newFunc
 
+
 def deprecated(oldFunc):
 	"""Decorator that is used to deprecate functions"""
 	def newFunc(*args, **kw):
@@ -56,8 +58,10 @@ def deprecated(oldFunc):
 	newFunc.__module__ = oldFunc.__module__
 	return newFunc
 
+
 def logged(oldFunc):
-	"""Decorator that is used to log a function's calls -- currently uses sys.stderr"""
+	"""Decorator that is used to log a function's calls 
+		-- currently uses sys.stderr"""
 	def newFunc(*args, **kw):
 		logMsg = "%s(%s, %s) -> " % (oldFunc.__name__, str(args).strip("[]"), str(kw).strip("{}").replace(": ", "="))
 		sys.stderr.write(logMsg)
@@ -77,6 +81,7 @@ def logged(oldFunc):
 	newFunc.__module__ = oldFunc.__module__
 	return newFunc
 
+
 def timed(oldFunc):
 	"""Decorator that is used to time a function's execution"""
 	def newFunc(*args, **kw):
@@ -85,9 +90,10 @@ def timed(oldFunc):
 			res = oldFunc(*args, **kw)
 		finally:
 			finish = time.time()
-			print "%s: %f" % (oldFunc.__name__, finish-start)
+			print "%s: %f" % (oldFunc.__name__, finish - start)
 		return res
 	return newFunc
+
 
 def editAndContinue(filespec, mod, name):
 	def wrapper(oldFunc):
@@ -95,6 +101,7 @@ def editAndContinue(filespec, mod, name):
 		persist['lastMod'] = time.time()
 		persist['oldFunc'] = oldFunc
 		persist['func'] = oldFunc
+
 		def newFunc(*args, **kw):
 			modTime = os.stat(filespec)[8]
 			if (modTime > persist['lastMod']):
@@ -105,6 +112,7 @@ def editAndContinue(filespec, mod, name):
 			return persist['func'](*args, **kw)
 		return newFunc
 	return wrapper
+
 
 class failsafe(object):
 	"""Class that attempts to make RPCs, but will fall back to a local object that implements the same methods"""
@@ -134,6 +142,7 @@ class failsafe(object):
 	def __delattr__(self, name):
 		return delattr(self.__dict__['__current_obj__'], name)
 
+
 class reference(object):
 	"""Class used to create a replacable reference to an object"""
 	@deprecated
@@ -152,6 +161,7 @@ class reference(object):
 	def __delattr__(self, name):
 		return delattr(self.__dict__['__real_obj__'], name)
 
+
 def signalHandler(signalNumber):
 	"""Used to denote a particular function as the signal handler for a 
 	   specific signal"""
@@ -159,6 +169,7 @@ def signalHandler(signalNumber):
 		signal.signal(signalNumber, function)
 		return function
 	return __decorator
+
 
 def boolean(value):
 	"""Convert a variable to a boolean"""
@@ -181,6 +192,7 @@ def boolean(value):
 	else:
 		raise ValueError
 
+
 def instantiateImplementation(className, *args):
 	"""Create an instance of an object with the given class name and list 
 	   of args to __init__"""
@@ -193,6 +205,7 @@ def instantiateImplementation(className, *args):
 	exec cmd in locals()
 	# XXXstroucki: this is correct, even though pydev complains
 	return _obj
+
 
 def convertExceptions(oldFunc):
 	"""This converts any exception type into a TashiException so that 
@@ -209,6 +222,7 @@ def convertExceptions(oldFunc):
 			raise
 	return newFunc
 
+
 def getConfig(additionalNames=[], additionalFiles=[]):
 	"""Creates many permutations of a list of locations to look for config 
 	   files and then loads them"""
@@ -222,6 +236,7 @@ def getConfig(additionalNames=[], additionalFiles=[]):
 		raise Exception("No config file could be found: %s" % (str(allLocations)))
 	return (config, configFiles)
 
+
 def __getShellFn():
 	try:
 		from IPython.Shell import IPShellEmbed
@@ -229,6 +244,7 @@ def __getShellFn():
 	except ImportError:
 		import IPython
 		return (2, IPython.embed)
+
 
 def debugConsole(globalDict):
 	"""A debugging console that optionally uses pysh"""
@@ -263,6 +279,7 @@ def debugConsole(globalDict):
 	if (os.getenv("DEBUG", "0") == "1"):
 		threading.Thread(name="debugConsole", target=lambda: realDebugConsole(globalDict)).start()
 
+
 def stringPartition(s, field):
 	index = s.find(field)
 	if (index == -1):
@@ -272,12 +289,14 @@ def stringPartition(s, field):
 	r = s[index+len(field):]
 	return (l, sep, r)
 
+
 def scrubString(s, allowed="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_."):
 	ns = ""
 	for c in s:
 		if (c in allowed):
 			ns = ns + c
 	return ns
+
 
 class Connection:
 
